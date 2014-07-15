@@ -24,11 +24,9 @@ int traccia = 0;
 
 void setup(){
   
-  Serial.begin(2400);
+  Serial.begin(800);
   xl.begin(10);                   // Setup SPI protocol, issue device soft reset
   xl.beginMeasure();              // Switch ADXL362 to measure mode  
-	
-  Serial.println("ReAudioguide touch + accelero: test dei sensori");
 }
 
 void loop(){
@@ -37,15 +35,13 @@ void loop(){
   
    if(sensorValue2 > threshold){
      if(traccia != 2){
-       Serial.write(2); //Basso,
-       //Serial.print("\n Traccia Ordine basso "); 
+       Serial.write(2); //Play the second track: Ordine basso della facciata,
        traccia = 2;
      }
   }
   if(sensorValue > threshold) {
     if(traccia != 1){
-     Serial.write(1); //Piazza,
-     //Serial.print("\n Traccia Piazza ");
+     Serial.write(1); //Play the first track: Piazza,
      traccia = 1;
     }
   }
@@ -53,31 +49,27 @@ void loop(){
   
   if(XValue > 1100 || XValue < -1100) {
     if(statoplay != 8){
-      Serial.write(8); //Pausa,
-      //Serial.print("\n PAUSA "); 
-      statoplay = 8; // ex statoplay
+      Serial.write(8); //Pause mode,
+      statoplay = 8;
       traccia = 0;
     }
   }else{
      if((statoplay != 9)&&(XValue < 600 && XValue > -600)){
-       Serial.write(9); //Play,
-       //Serial.print("\n PLAY ");
-       statoplay=9; // ex statoplay
+       Serial.write(9); //Play mode,
+       statoplay=9; //
        traccia = 0;
      } 
   }
   if(YValue > 500) {
     if(YValue > 1200) {
       if(stato != 12){
-         Serial.write(12); //Rewind,
-         //Serial.print("\n REWIND ");
+         Serial.write(12); //Rewind the track,
          stato=12;
       }
     }else{
       if(stato == 12){
         if(YValue < 700) {
-          Serial.write(9); //Play,
-          //Serial.print("\n PLAY ");
+          Serial.write(9); //return in play mode,
           stato=0;
         }
       }
@@ -86,15 +78,13 @@ void loop(){
   if(YValue < -500) {
     if(YValue < -1200) {
       if(stato != 22){
-         Serial.write(22); //Foward,
-         //Serial.print("\n FOWARD ");
+         Serial.write(22); //Foward the track,
          stato=22;
       }
     }else{
       if(stato == 22){
         if(YValue > -700) {
-          Serial.write(9); //Play,
-          //Serial.print("\n PLAY ");
+          Serial.write(9); //return in play mode,
           stato=0;
         }
       }
