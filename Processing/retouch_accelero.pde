@@ -6,10 +6,11 @@ AudioPlayer player;
 
 boolean cell_1 = false; 
 Serial myPort;
-int autorizz = 9;
+int autorizz;
 int indexForNames = 8;
-int nowPlaying = 0;
-
+int nowPlaying;
+int pausePlaying;
+int countRewind;
 
 void setup() {  
   size(512, 250); 
@@ -17,13 +18,16 @@ void setup() {
   //smooth();
   //noStroke();
   //ellipseMode(CENTER);
-  myPort = new Serial(this, Serial.list()[Serial.list().length-1], 800); // TODO dinamico
+  nowPlaying = 0;
+  autorizz = 9;
+  countRewind = 0;
+  pausePlaying = -1500; //variabile legata al timing delle pause
+  myPort = new Serial(this, Serial.list()[Serial.list().length-1], 800);
   minim = new Minim(this); 
   player = minim.loadFile("track"+indexForNames+".mp3");
 } 
 void draw() { 
   int lettura = myPort.read(); 
-  int pausePlaying = -1500; //variabile legato al timing delle pause
   if (lettura == 8 || lettura == 22 || lettura == 12) {
     autorizz = 8;
   }else{
@@ -47,13 +51,17 @@ void draw() {
  
  if (lettura == 8){ // 8 è il segnale di STOP: Arduino invia 8 quando il modellino è inclinato
   if (player.isPlaying()) {player.pause();}   
-  pausePlaying = millis(); // FUNZIONA??? mi sa di no! settiamo la variabile pausePlaying al tempo di pause. Vogliamo che, dopo aver messo in pausa, sia impossibile partire con un nuovo play prima che sia trascorso del tempo (1500 millisec, impostato nell'IF in partenza)
+  pausePlaying = millis(); // TODO: debug! settiamo la variabile pausePlaying al tempo di pause. Vogliamo che, dopo aver messo in pausa, sia impossibile partire con un nuovo play prima che sia trascorso del tempo (1500 millisec, impostato nell'IF in partenza)
  } 
  
-  if (lettura == 12 && player.isPlaying()){ // 8 è il segnale di STOP: Arduino invia 8 quando il modellino è inclinato
-    player.pause();
-    player.skip(-1600);
-    delay(300);  
+  if (lettura == 12 && (player.isPlaying()) || countRewind != 0){ // 8 è il segnale di STOP: Arduino invia 8 quando il modellino è inclinato
+    if (player.isPlaying()) {player.pause();}   
+    countRewind = countRewind - 60;
+ }
+ if (lettura == 13){
+    player.skip(countRewind);
+    countRewind=0;
+    player.play();
  }
      
   println(lettura); 
